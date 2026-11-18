@@ -4,7 +4,14 @@ PORT=${PORT:-8080}
 if [ -z "$UUID" ]; then echo "UUID env missing" >&2; exit 1; fi
 if [ -z "$WS_PATH" ]; then echo "WS_PATH env missing" >&2; exit 1; fi
 echo "Downloading xray-core official release..."
-curl -fsSL -o /tmp/xray.zip "https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip"
+ARCH=$(uname -m)
+case "$ARCH" in
+  x86_64|amd64) XRAY_ZIP="Xray-linux-64.zip" ;;
+  aarch64|arm64) XRAY_ZIP="Xray-linux-arm64-v8a.zip" ;;
+  *) echo "Unsupported arch: $ARCH" >&2; exit 1 ;;
+esac
+echo "Architecture $ARCH, downloading $XRAY_ZIP"
+curl -fsSL -o /tmp/xray.zip "https://github.com/XTLS/Xray-core/releases/latest/download/$XRAY_ZIP"
 unzip -o /tmp/xray.zip -d /usr/local/bin/ xray
 chmod +x /usr/local/bin/xray
 mkdir -p /etc/xray
